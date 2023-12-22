@@ -4,19 +4,24 @@ import os
 import pandas as pd
 import re
 
+def pretraiter_image(img):
+    # Ajoutez des étapes de prétraitement supplémentaires si nécessaire
+    gris = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    return gris
+
 def extraire_texte_de_l_image(chemin_image):
     try:
-        # Lire l'image en utilisant OpenCV
         img = cv2.imread(chemin_image)
+        if img is None:
+            raise Exception("Erreur : Impossible d'ouvrir l'image.")
 
-        # Prétraiter l'image (niveau de gris, réduction de bruit, etc.)
-        gris = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        # Appliquer des étapes de prétraitement supplémentaires si nécessaire
+        # Prétraiter l'image
+        img_pretraitee = pretraiter_image(img)
 
         # Utiliser Tesseract OCR pour extraire le texte
-        texte = pytesseract.image_to_string(gris, lang='fra')
+        texte = pytesseract.image_to_string(img_pretraitee, lang='eng')
 
-        return texte.strip()  # Supprimer les espaces en début et fin
+        return texte.strip()
     except Exception as e:
         return str(e)
 

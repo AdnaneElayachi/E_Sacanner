@@ -37,6 +37,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'MonApp',
+
 ]
 
 MIDDLEWARE = [
@@ -73,16 +75,7 @@ WSGI_APPLICATION = 'MonProjet.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-      'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'MyApplication',
-        'USER': 'postgres',
-        'PASSWORD': '',
-        'HOST': 'localhost',
-        'PORT': '5432',
-    }
-}
+
 
 
 # Password validation
@@ -145,9 +138,10 @@ EMAIL_PORT=587
 SESSION_COOKIE_AGE = 3600  
 
 
-AUTH_USER_MODEL="MonApp.CustomUser"
+
 AUTHENTICATION_BACKENDS = ( 
     'MonApp.backends.CaseInsensitiveModelBackend',
 
     'django.contrib.auth.backends.AllowAllUsersModelBackend',
 )
+

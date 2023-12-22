@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>OCR View</title>
+</head>
+<body>
+    <h2>OCR View</h2>
+    
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <input type="file" name="image_file" accept="image/*" required>
+        <button type="submit">Soumettre</button>
+    </form>
+
+    {% if resultat %}
+        <h3>Résultat de l'OCR :</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Champ</th>
+                    <th>Valeur</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for entry in resultat %}
+                    <tr>
+                        <td>{{ entry.Champ }}</td>
+                        <td>{{ entry.Valeur }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+</body>
+</html>

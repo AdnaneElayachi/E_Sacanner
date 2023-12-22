@@ -1,88 +1,27 @@
-from django.contrib.auth import authenticate, login as auth_login
-from django.core.mail import send_mail
-from django.shortcuts import redirect, render
+import os
 from django.conf import settings
-from .models import CustomUser
-import cv2
-import pytesseract
-def Login(request):
-    if request.method == "POST":
-        email_login = request.POST.get('email_login')        
-        password_login = request.POST.get('password_login')
-        user = authenticate(request, username=email_login, password=password_login)
-        
-        if user is not None:
-            if user.compteActive:
-                user_department = user.departement
-                request.session['user_department'] = user_department.pk
+from django.http import JsonResponse
+from django.shortcuts import render
 
-                auth_login(request, user)
-                return redirect('accueil')  # Remplacez 'accueil' par le nom de votre vue d'accueil
-            else:
-                return render(request, 'CompteDesactiver.html')
-        else:
-            erreur = "Authentification non valide"  
-            return render(request, 'singin.html', {'erreur': erreur})
-    
-    return render(request, 'singin.html')
+from .scanner_ocr import reconnaissance_ID 
 
-def Register(request):
-    if request.method == "POST":
-        nom_registre = request.POST.get('Nom_registre')
-        prenom_registre = request.POST.get('Prenom_registre')
-        email_registre = request.POST.get('email_registre')
-        mdp_registre = request.POST.get('mdp_registre')
-        mdp_registre_confirm = request.POST.get('mdp_registre_confirm')
+def ocr_view(request):
+    if request.method == 'POST':
+        image_file = request.FILES['image_file']
 
-        if mdp_registre != mdp_registre_confirm:
-            erreur = "Les mots de passe ne correspondent pas"
-            return render(request, 'singup.html', {'erreur': erreur})
+        upload_folder = os.path.join(settings.BASE_DIR, 'chemin/vers/dossier/upload/')
 
-        try:
-            user = CustomUser.objects.create_user(
-                email=email_registre,
-                password=mdp_registre,
-                first_name=prenom_registre,
-                last_name=nom_registre,
-            )
+        if not os.path.exists(upload_folder):
+            os.makedirs(upload_folder)
 
-            user.save()
-            
-            subject = 'Bienvenue sur notre plateforme'
-            message = f'Bonjour {user.first_name} {user.last_name}, Merci pour votre inscription. Attendez la confirmation de votre compte.'
-            email_from = settings.EMAIL_HOST_USER
-            recipient_list = [user.email]
+        chemin_image = os.path.join(upload_folder, image_file.name)
 
-            send_mail(subject, message, email_from, recipient_list)
-            
-            return redirect('Login')
+        with open(chemin_image, 'wb') as destination:
+            for chunk in image_file.chunks():
+                destination.write(chunk)
 
-        except Exception as e:
-            print('Erreur inconnue:', e)
-            erreur = "Une erreur est survenue lors de l'inscription"
-            return render(request, 'singup.html', {'erreur': erreur})
+        resultat_df = reconnaissance_ID(chemin_image)
 
-    return render(request, 'singup.html')
+        return JsonResponse({'resultat': resultat_df.to_dict(orient='records')})
 
-
-##############################
-def inputImage(Images):
-    return Images.imread(Images)
-
-def ocr_core(img):
-    text = pytesseract.image_to_string(img)
-    return text
-
-def get_grayscale(image):
-    return cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
-
-def remove_noise(image):
-    return cv2.medianBlur(image,5)
-
-def thresholding(image):
-    return cv2.threshold(image,0,255,cv2.THRESH_BINARY+cv2.THRESH_OTSU)[1]
-
-inputImage=get_grayscale(inputImage)
-inputImage=thresholding(inputImage)
-inputImage=remove_noise(inputImage)
-
+    return render(request, 'index.html')
