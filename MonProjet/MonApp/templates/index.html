@@ -1,35 +1,81 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>OCR View</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EScanner</title>
+
+    <!-- Inclure Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .description {
+            display: none;
+            margin-top: 20px;
+        }
+
+        footer {
+            background-color: #f8f9fa;
+            padding: 20px 0;
+            text-align: center;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+        }
+    </style>
 </head>
 <body>
-    <h2>OCR View</h2>
-    
-    <form method="post" enctype="multipart/form-data">
-        {% csrf_token %}
-        <input type="file" name="image_file" accept="image/*" required>
-        <button type="submit">Soumettre</button>
-    </form>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">EScanner</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Accueil</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="toggleDescription()">À Propos</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
 
-    {% if resultat %}
-        <h3>Résultat de l'OCR :</h3>
-        <table>
-            <thead>
-                <tr>
-                    <th>Champ</th>
-                    <th>Valeur</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for entry in resultat %}
-                    <tr>
-                        <td>{{ entry.Champ }}</td>
-                        <td>{{ entry.Valeur }}</td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    {% endif %}
+    <div class="container mt-5">
+        <h1 class="mb-4">EScanner</h1>
+        
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label for="image_file" class="form-label">Sélectionner une image</label>
+                <input type="file" class="form-control" name="image_file" id="image_file" accept="image/*" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Soumettre</button>
+        </form>
+
+        <div class="description" id="description">
+            <h2>Description</h2>
+            <p>Ceci est une description de votre site. Vous pouvez ajouter du texte supplémentaire ici.</p>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2023 EScanner. Tous droits réservés.</p>
+    </footer>
+
+    <!-- Inclure Bootstrap JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function toggleDescription() {
+            var description = document.getElementById('description');
+            if (description.style.display === 'none') {
+                description.style.display = 'block';
+            } else {
+                description.style.display = 'none';
+            }
+        }
+    </script>
 </body>
 </html>
