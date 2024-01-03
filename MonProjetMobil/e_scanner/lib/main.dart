@@ -37,14 +37,17 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Flutter + Django'),
+        title: Text('E-Scanner'),
       ),
       body: Center(
         child: ElevatedButton(
           onPressed: fetchData,
-          child: Text('Obtenir des données depuis Django'),
+          child: Text(''),
         ),
       ),
     );
   }
 }
+
+
+
