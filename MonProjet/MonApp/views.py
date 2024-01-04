@@ -11,9 +11,10 @@ from rest_framework import status
 from .models import ResultatOCR
 from .serializers import ResultatOCRSerializer
 class ResultatOCRList(APIView):
+
     def get(self, request):
-        articles = ResultatOCR.objects.all()
-        serializer = ResultatOCRSerializer(articles, many=True)
+        resultatOCR = ResultatOCR.objects.all()
+        serializer = ResultatOCRSerializer(resultatOCR, many=True)
         return Response(serializer.data)
 
     def post(self, request):
@@ -62,14 +63,3 @@ def ocr_view(request):
 
 
 ############################################################################################################
-
-from rest_framework.response import Response
-from rest_framework.decorators import api_view
-
-@api_view(['GET'])
-def getData(request):
-    resultats = ResultatOCR.objects.all()
-
-    serializer = ResultatOCRSerializer(resultats, many=True)
-
-    return Response(serializer.data)
