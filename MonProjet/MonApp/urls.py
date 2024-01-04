@@ -1,8 +1,9 @@
 from django.urls import path
-from .views import ResultatOCRList, ocr_view
+
+from MonApp.graphql_views import GraphQLView
+from .views import  ocr_view
 
 urlpatterns = [
     path('ocr/', ocr_view, name='ocr_view'),
-     path('ResultatOCRList/', ResultatOCRList.as_view(), name='ResultatOCRList'),
-     
+    path('graphql/', GraphQLView.as_view(graphiql=True)),
 ]

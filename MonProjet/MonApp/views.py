@@ -59,3 +59,10 @@ def ocr_view(request):
         return JsonResponse({'resultat': resultat_df.to_dict(orient='records')})
 
     return render(request, 'index.html')
+
+
+############################################################################################################
+
+
+
+
