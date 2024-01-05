@@ -1,6 +1,7 @@
 import cv2
 import pytesseract
 import easyocr
+import numpy as np  # Ajoutez cette ligne pour importer NumPy
 from PIL import Image
 
 def process_your_image(image_path):

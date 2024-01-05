@@ -1,35 +1,22 @@
-import 'dart:convert';
-import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-
-void main() {
-  runApp(MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      home: MyHomePage(),
-    );
-  }
-}
-
-class MyHomePage extends StatefulWidget {
-  @override
-  _MyHomePageState createState() => _MyHomePageState();
-}
+// ... (Previous code)
 
 class _MyHomePageState extends State<MyHomePage> {
+  TextEditingController urlController = TextEditingController();
+  String fetchedData = ''; // Added to store fetched data
+
   Future<void> fetchData() async {
-    final response = await http.get('http://localhost/data:8000' as Uri);
+    final response = await http.get(Uri.parse(urlController.text));
     if (response.statusCode == 200) {
       // Traitement des données
       final data = json.decode(response.body);
-      print(data);
+      setState(() {
+        fetchedData = data.toString(); // Update fetched data
+      });
     } else {
       // Gestion des erreurs
-      print('Erreur ${response.statusCode}');
+      setState(() {
+        fetchedData = 'Erreur ${response.statusCode}';
+      });
     }
   }
 
@@ -40,14 +27,27 @@ class _MyHomePageState extends State<MyHomePage> {
         title: Text('E-Scanner'),
       ),
       body: Center(
-        child: ElevatedButton(
-          onPressed: fetchData,
-          child: Text(''),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            TextFormField(
+              controller: urlController,
+              decoration: InputDecoration(labelText: 'URL de l\'image'),
+            ),
+            SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: fetchData,
+              child: Text('Charger l\'image'),
+            ),
+            SizedBox(height: 20),
+            // Display the fetched data
+            Text(
+              'Données récupérées : $fetchedData',
+              style: TextStyle(fontSize: 16),
+            ),
+          ],
         ),
       ),
     );
   }
 }
-
-
-
