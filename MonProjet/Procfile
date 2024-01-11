@@ -1,0 +1,1 @@
+gunicorn MonProjet.wsgi:MonProjet --log-file -
