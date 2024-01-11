@@ -74,18 +74,16 @@ from .serializers import ResultatOCRSerializer
 
 class OCRView(View):
 
+    template_name = 'index.html' 
 
     def get(self, request):
-        # Affiche le formulaire lorsqu'il est accédé via GET
         return render(request, self.template_name)
 
     def post(self, request):
-        # Traite l'image OCR lorsqu'il est accédé via POST
         image_file = request.FILES.get('image_file')
 
         if image_file:
             try:
-                # Enregistrez le fichier image et obtenez le chemin d'accès
                 upload_folder = 'chemin/vers/dossier/upload/'
                 chemin_image = os.path.join(upload_folder, image_file.name)
 
@@ -93,10 +91,8 @@ class OCRView(View):
                     for chunk in image_file.chunks():
                         destination.write(chunk)
 
-                # Effectuez le traitement OCR
                 resultat_df = reconnaissance_ID(chemin_image)
 
-                # Sauvegardez les résultats dans la base de données (ajustez selon vos besoins)
                 serializer = ResultatOCRSerializer(data=resultat_df.to_dict(orient='records'), many=True)
                 if serializer.is_valid():
                     serializer.save()
@@ -113,24 +109,69 @@ from rest_framework.response import Response
 from rest_framework import status
 from .scanner_ocr import reconnaissance_ID
 from .models import ResultatOCR
+from rest_framework.parsers import MultiPartParser
 from .serializers import ResultatOCRSerializer
+
+
+# class OCRAPIView(APIView):
+#     parser_classes = [MultiPartParser]
+#     template_name = 'index.html'
+#     def get(self, request, format=None):      
+#         return render(request, self.template_name)
+#     def post(self, request, format=None):  
+         
+#         image_file = request.FILES.get('image_file')
+#         if image_file:
+#             try:              
+#                 upload_folder = 'chemin/vers/dossier/upload/'
+#                 chemin_image = os.path.join(upload_folder, image_file.name)
+#                 with open(chemin_image, 'wb') as destination:
+#                     for chunk in image_file.chunks():
+#                         destination.write(chunk)             
+#                 resultat_df = reconnaissance_ID(chemin_image)              
+#                 serializer = ResultatOCRSerializer(data=resultat_df.to_dict(orient='records'), many=True)
+#                 if serializer.is_valid():
+#                     serializer.save()
+#                 return Response({'resultat': resultat_df.to_dict(orient='records')}, status=status.HTTP_200_OK)
+#             except Exception as e:
+#                 return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+#         return Response({'error': 'Aucun fichier image n\'a été fourni.'}, status=status.HTTP_400_BAD_REQUEST)
+
+
+# views.py
 class OCRAPIView(APIView):
-    def get(self, request, format=None):      
-        return Response({'message': 'Utilisez une requête POST pour effectuer l\'OCR.'})
-    def post(self, request, format=None):   
+    parser_classes = [MultiPartParser]
+    template_name = 'index.html'
+
+    def get(self, request, format=None):
+        return render(request, self.template_name)
+
+    def post(self, request, format=None):
         image_file = request.FILES.get('image_file')
         if image_file:
-            try:              
+            try:
                 upload_folder = 'chemin/vers/dossier/upload/'
                 chemin_image = os.path.join(upload_folder, image_file.name)
+
                 with open(chemin_image, 'wb') as destination:
                     for chunk in image_file.chunks():
-                        destination.write(chunk)             
-                resultat_df = reconnaissance_ID(chemin_image)              
+                        destination.write(chunk)
+
+                resultat_df = reconnaissance_ID(chemin_image)
+
+                # Extract essential information (modify as per your OCR output structure)
+                name = resultat_df[resultat_df['Champ'] == 'NOM']['Valeur'].iloc[0]
+                date_of_birth = resultat_df[resultat_df['Champ'] == 'Néle']['Valeur'].iloc[0]
+
+                # Save to ResultatOCR model
+                ResultatOCR.objects.create(name=name, date_of_birth=date_of_birth)
+
                 serializer = ResultatOCRSerializer(data=resultat_df.to_dict(orient='records'), many=True)
                 if serializer.is_valid():
                     serializer.save()
+
                 return Response({'resultat': resultat_df.to_dict(orient='records')}, status=status.HTTP_200_OK)
             except Exception as e:
                 return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         return Response({'error': 'Aucun fichier image n\'a été fourni.'}, status=status.HTTP_400_BAD_REQUEST)
+
