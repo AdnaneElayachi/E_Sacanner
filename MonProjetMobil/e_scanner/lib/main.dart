@@ -249,11 +249,118 @@
 //   }
 // }
 // 33333333333333333333333333333333
+
+// import 'dart:io';
+
+// import 'package:flutter/material.dart';
+// import 'package:image_picker/image_picker.dart';
+// import 'package:flutter_tesseract_ocr/flutter_tesseract_ocr.dart';
+// import 'dart:io';
+
+// import 'package:flutter/material.dart';
+// import 'package:image_picker/image_picker.dart';
+// import 'package:flutter_tesseract_ocr/flutter_tesseract_ocr.dart';
+
+// void main() {
+//   runApp(MyApp());
+// }
+
+// class MyApp extends StatelessWidget {
+//   @override
+//   Widget build(BuildContext context) {
+//     return MaterialApp(
+//       home: MyHomePage(),
+//     );
+//   }
+// }
+
+// class MyHomePage extends StatefulWidget {
+//   @override
+//   _MyHomePageState createState() => _MyHomePageState();
+// }
+
+// class _MyHomePageState extends State<MyHomePage> {
+//   TextEditingController urlController = TextEditingController();
+//   bool isLoading = false;
+//   final ImagePicker _picker = ImagePicker();
+//   File? _pickedImage;
+//   String _extractedText = '';
+
+//   Future<void> pickImage() async {
+//     final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
+
+//     if (pickedFile != null) {
+//       setState(() {
+//         _pickedImage = File(pickedFile.path);
+//       });
+//     }
+//   }
+
+//   Future<void> _startOCR() async {
+//     try {
+//       final result = await FlutterTesseractOcr.extractText(_pickedImage!.path);
+//       print('Texte extrait : $result');
+
+//       setState(() {
+//         _extractedText = result ?? 'No text extracted';
+//       });
+//     } catch (e) {
+//       print('Erreur lors de l\'extraction du texte : $e');
+//       setState(() {
+//         _extractedText = 'Error during text extraction';
+//       });
+//     }
+//   }
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       appBar: AppBar(
+//         title: Text('E-Scanner'),
+//       ),
+//       body: Center(
+//         child: Column(
+//           mainAxisAlignment: MainAxisAlignment.center,
+//           children: [
+//             ElevatedButton(
+//               onPressed: pickImage,
+//               child: Text('Sélectionner une image'),
+//             ),
+//             SizedBox(height: 20),
+//             if (_pickedImage != null) Image.network(_pickedImage!.path),
+//             SizedBox(height: 20),
+//             ElevatedButton(
+//               onPressed: isLoading
+//                   ? null
+//                   : () async {
+//                       await _startOCR();
+//                     },
+//               child: Text('Charger l\'image et exécuter OCR'),
+//             ),
+//             SizedBox(height: 20),
+//             if (isLoading)
+//               CircularProgressIndicator()
+//             else
+//               Text(
+//                 'Texte extrait : $_extractedText',
+//                 style: TextStyle(fontSize: 16),
+//               ),
+//           ],
+//         ),
+//       ),
+//     );
+//   }
+// }
+// 44444444444444444444444444444444444444444
+//
+//
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
+import 'package:http/http.dart' as http;
 import 'package:flutter_tesseract_ocr/flutter_tesseract_ocr.dart';
+import 'package:file_picker/file_picker.dart';
 
 void main() {
   runApp(MyApp());
@@ -274,20 +381,15 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  TextEditingController urlController = TextEditingController();
   bool isLoading = false;
-  final ImagePicker _picker = ImagePicker();
   File? _pickedImage;
   String _extractedText = '';
 
   Future<void> pickImage() async {
-    final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
-
-    if (pickedFile != null) {
-      setState(() {
-        _pickedImage = File(pickedFile.path);
-      });
-    }
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      type: FileType.image,
+      allowMultiple: false,
+    );
   }
 
   Future<void> _startOCR() async {
@@ -302,8 +404,43 @@ class _MyHomePageState extends State<MyHomePage> {
       setState(() {
         _extractedText = result ?? 'No text extracted';
       });
+
+      // Envoyer le fichier image à l'API Django
+      await sendImageToDjango(_pickedImage!);
     } catch (e) {
       print('Erreur lors de l\'extraction du texte : $e');
+      setState(() {
+        _extractedText = 'Error during text extraction';
+      });
+    }
+  }
+
+  Future<void> sendImageToDjango(File imageFile) async {
+    final apiUrl = 'http://127.0.0.1:8000/ocrapi';
+
+    try {
+      var request = http.MultipartRequest('POST', Uri.parse(apiUrl))
+        ..files.add(await http.MultipartFile.fromPath(
+          'image_file',
+          imageFile.path,
+        ));
+
+      var response = await request.send();
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> data =
+            json.decode(await response.stream.bytesToString());
+        // Traitez les données de la réponse ici
+        print('Réponse de l\'API Django : $data');
+      } else {
+        print(
+            'Erreur lors de la requête vers l\'API Django. Statut : ${response.statusCode}');
+      }
+    } catch (error) {
+      print('Exception lors de la requête vers l\'API Django : $error');
+      setState(() {
+        _extractedText = 'Error during API request';
+      });
     }
   }
 
@@ -322,7 +459,7 @@ class _MyHomePageState extends State<MyHomePage> {
               child: Text('Sélectionner une image'),
             ),
             SizedBox(height: 20),
-            if (_pickedImage != null) Image.network(_pickedImage!.path),
+            if (_pickedImage != null) Image.file(_pickedImage!),
             SizedBox(height: 20),
             ElevatedButton(
               onPressed: isLoading

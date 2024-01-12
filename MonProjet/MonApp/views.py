@@ -64,6 +64,46 @@
 
 # ############################################################################################################
 
+# import os
+# from django.views import View
+# from django.shortcuts import render
+# from django.http import JsonResponse
+# from .scanner_ocr import reconnaissance_ID
+# from .models import ResultatOCR
+# from .serializers import ResultatOCRSerializer
+
+# class OCRView(View):
+
+#     template_name = 'index.html' 
+
+#     def get(self, request):
+#         return render(request, self.template_name)
+
+#     def post(self, request):
+#         image_file = request.FILES.get('image_file')
+
+#         if image_file:
+#             try:
+#                 upload_folder = 'chemin/vers/dossier/upload/'
+#                 chemin_image = os.path.join(upload_folder, image_file.name)
+
+#                 with open(chemin_image, 'wb') as destination:
+#                     for chunk in image_file.chunks():
+#                         destination.write(chunk)
+
+#                 resultat_df = reconnaissance_ID(chemin_image)
+
+#                 serializer = ResultatOCRSerializer(data=resultat_df.to_dict(orient='records'), many=True)
+#                 if serializer.is_valid():
+#                     serializer.save()
+
+#                 return JsonResponse({'resultat': resultat_df.to_dict(orient='records')})
+
+#             except Exception as e:
+#                 return JsonResponse({'error': str(e)})
+
+#         return JsonResponse({'error': 'Aucun fichier image n\'a été fourni.'})
+
 import os
 from django.views import View
 from django.shortcuts import render
@@ -91,18 +131,17 @@ class OCRView(View):
                     for chunk in image_file.chunks():
                         destination.write(chunk)
 
-                resultat_df = reconnaissance_ID(chemin_image)
+                texte = reconnaissance_ID(chemin_image)
 
-                serializer = ResultatOCRSerializer(data=resultat_df.to_dict(orient='records'), many=True)
-                if serializer.is_valid():
-                    serializer.save()
-
-                return JsonResponse({'resultat': resultat_df.to_dict(orient='records')})
+                # Now you can use 'texte' as needed, for example, display it in the template
+                context = {'texte': texte}
+                return render(request, self.template_name, context)
 
             except Exception as e:
                 return JsonResponse({'error': str(e)})
 
         return JsonResponse({'error': 'Aucun fichier image n\'a été fourni.'})
+
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -138,7 +177,9 @@ from .serializers import ResultatOCRSerializer
 #         return Response({'error': 'Aucun fichier image n\'a été fourni.'}, status=status.HTTP_400_BAD_REQUEST)
 
 
-# views.py
+
+
+
 class OCRAPIView(APIView):
     parser_classes = [MultiPartParser]
     template_name = 'index.html'

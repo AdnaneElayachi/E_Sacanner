@@ -48,6 +48,7 @@ dependencies:
   socket_io_client: ^2.0.3+1
   flutter_scalable_ocr: ^2.0.0
   flutter_ocr_sdk: ^1.1.4
+  file_picker: ^6.1.1
 
 dev_dependencies:
   flutter_test:
