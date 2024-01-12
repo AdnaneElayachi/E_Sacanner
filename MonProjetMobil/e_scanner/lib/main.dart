@@ -103,9 +103,8 @@
 //   }
 // }
 
-// // 11111111111111111111
+// // 222222222222222222222222
 // import 'dart:io';
-
 // import 'package:flutter/material.dart';
 // import 'package:image_picker/image_picker.dart';
 // import 'package:flutter_tesseract_ocr/flutter_tesseract_ocr.dart';
@@ -134,8 +133,40 @@
 
 // class _HomeScreenState extends State<HomeScreen> {
 //   bool _scanning = false;
-//   String _extractText = '';
+//   String _extractedText = '';
 //   File? _pickedImage;
+
+//   Future<void> _pickImageAndStartOCR() async {
+//     setState(() {
+//       _scanning = true;
+//     });
+
+//     final pickedImage = await ImagePicker().pickImage(
+//       source: ImageSource.gallery,
+//     );
+
+//     if (pickedImage != null) {
+//       _pickedImage = File(pickedImage.path);
+//       await _startOCR();
+//     }
+
+//     setState(() {
+//       _scanning = false;
+//     });
+//   }
+
+//   Future<void> _startOCR() async {
+//     if (_pickedImage == null) {
+//       return;
+//     }
+
+//     final result = await FlutterTesseractOcr.extractText(_pickedImage!.path);
+//     print('Texte extrait : $result');
+
+//     setState(() {
+//       _extractedText = result ?? 'No text extracted';
+//     });
+//   }
 
 //   @override
 //   Widget build(BuildContext context) {
@@ -173,30 +204,9 @@
 //               style: ElevatedButton.styleFrom(
 //                 primary: Colors.green,
 //               ),
-//               onPressed: () async {
-//                 setState(() {
-//                   _scanning = true;
-//                 });
-//                 final pickedImage = await ImagePicker().pickImage(
-//                   source: ImageSource.gallery,
-//                 );
-
-//                 if (pickedImage != null) {
-//                   _pickedImage = File(pickedImage.path);
-//                   _extractText = await FlutterTesseractOcr.extractText(
-//                     _pickedImage!.path,
-//                   );
-//                 } else {
-//                   // L'utilisateur n'a pas sélectionné d'image.
-//                   // Vous pouvez gérer cela comme nécessaire.
-//                 }
-
-//                 setState(() {
-//                   _scanning = false;
-//                 });
-//               },
+//               onPressed: _scanning ? null : _pickImageAndStartOCR,
 //               child: Text(
-//                 'Pick Image with text',
+//                 'Pick Image and Start OCR',
 //                 style: TextStyle(
 //                   color: Colors.white,
 //                 ),
@@ -206,35 +216,44 @@
 //           SizedBox(height: 20),
 //           _scanning
 //               ? Center(child: CircularProgressIndicator())
-//               : Icon(
-//                   Icons.done,
-//                   size: 40,
-//                   color: Colors.green,
+//               : FutureBuilder<void>(
+//                   future: _startOCR(),
+//                   builder: (context, snapshot) {
+//                     if (snapshot.connectionState == ConnectionState.done) {
+//                       return Icon(
+//                         Icons.done,
+//                         size: 40,
+//                         color: Colors.green,
+//                       );
+//                     } else if (snapshot.hasError) {
+//                       return Text('Erreur : ${snapshot.error}');
+//                     } else {
+//                       return CircularProgressIndicator();
+//                     }
+//                   },
 //                 ),
 //           SizedBox(height: 20),
 //           Center(
 //             child: Text(
-//               _extractText,
+//               _extractedText.replaceAll('\n', ' '),
 //               textAlign: TextAlign.center,
 //               style: TextStyle(
-//                 fontSize: 30,
-//                 fontWeight: FontWeight.bold,
+//                 fontSize: 20,
+//                 fontWeight: FontWeight.normal,
 //               ),
 //             ),
-//           )
+//           ),
 //         ],
 //       ),
 //     );
 //   }
 // }
-
-// 2222222
+// 33333333333333333333333333333333
 import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:flutter_ocr_sdk/flutter_ocr_sdk.dart';
-import 'package:flutter_ocr_sdk/flutter_ocr_sdk.dart';
+import 'package:flutter_tesseract_ocr/flutter_tesseract_ocr.dart';
 
 void main() {
   runApp(MyApp());
@@ -244,32 +263,29 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(
-          title: Text('OCR Flutter'),
-        ),
-        body: HomeScreen(),
-      ),
+      home: MyHomePage(),
     );
   }
 }
 
-class HomeScreen extends StatefulWidget {
+class MyHomePage extends StatefulWidget {
   @override
-  _HomeScreenState createState() => _HomeScreenState();
+  _MyHomePageState createState() => _MyHomePageState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _MyHomePageState extends State<MyHomePage> {
+  TextEditingController urlController = TextEditingController();
+  bool isLoading = false;
+  final ImagePicker _picker = ImagePicker();
   File? _pickedImage;
   String _extractedText = '';
 
-  Future<void> _pickImage() async {
-    final pickedImage =
-        await ImagePicker().pickImage(source: ImageSource.gallery);
+  Future<void> pickImage() async {
+    final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
 
-    if (pickedImage != null) {
+    if (pickedFile != null) {
       setState(() {
-        _pickedImage = File(pickedImage.path);
+        _pickedImage = File(pickedFile.path);
       });
     }
   }
@@ -279,28 +295,54 @@ class _HomeScreenState extends State<HomeScreen> {
       return;
     }
 
-    final result = await FlutterOcr.extractText(_pickedImage!.path);
-    setState(() {
-      _extractedText = result ?? 'No text extracted';
-    });
+    try {
+      final result = await FlutterTesseractOcr.extractText(_pickedImage!.path);
+      print('Texte extrait : $result');
+
+      setState(() {
+        _extractedText = result ?? 'No text extracted';
+      });
+    } catch (e) {
+      print('Erreur lors de l\'extraction du texte : $e');
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        ElevatedButton(
-          onPressed: _pickImage,
-          child: Text('Pick Image'),
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('E-Scanner'),
+      ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            ElevatedButton(
+              onPressed: pickImage,
+              child: Text('Sélectionner une image'),
+            ),
+            SizedBox(height: 20),
+            if (_pickedImage != null) Image.network(_pickedImage!.path),
+            SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: isLoading
+                  ? null
+                  : () async {
+                      await _startOCR();
+                    },
+              child: Text('Charger l\'image et exécuter OCR'),
+            ),
+            SizedBox(height: 20),
+            if (isLoading)
+              CircularProgressIndicator()
+            else
+              Text(
+                'Texte extrait : $_extractedText',
+                style: TextStyle(fontSize: 16),
+              ),
+          ],
         ),
-        ElevatedButton(
-          onPressed: _startOCR,
-          child: Text('Start OCR'),
-        ),
-        _pickedImage == null ? Container() : Image.file(_pickedImage!),
-        Text(_extractedText),
-      ],
+      ),
     );
   }
 }
