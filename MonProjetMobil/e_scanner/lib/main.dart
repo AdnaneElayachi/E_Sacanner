@@ -354,13 +354,9 @@
 // 44444444444444444444444444444444444444444
 //
 //
-import 'dart:convert';
-import 'dart:io';
 
+import 'package:e_scanner/login.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'package:flutter_tesseract_ocr/flutter_tesseract_ocr.dart';
-import 'package:file_picker/file_picker.dart';
 
 void main() {
   runApp(const MyApp());
@@ -372,117 +368,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      home: MyHomePage(),
-    );
-  }
-}
-
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key});
-
-  @override
-  _MyHomePageState createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  bool isLoading = false;
-  File? _pickedImage;
-  String _extractedText = '';
-
-  Future<void> pickImage() async {
-    FilePickerResult? result = await FilePicker.platform.pickFiles(
-      type: FileType.image,
-      allowMultiple: false,
-    );
-  }
-
-  Future<void> _startOCR() async {
-    if (_pickedImage == null) {
-      return;
-    }
-
-    try {
-      final result = await FlutterTesseractOcr.extractText(_pickedImage!.path);
-      print('Texte extrait : $result');
-
-      setState(() {
-        _extractedText = result ?? 'No text extracted';
-      });
-
-      await sendImageToDjango(_pickedImage!);
-    } catch (e) {
-      print('Erreur lors de l\'extraction du texte : $e');
-      setState(() {
-        _extractedText = 'Error during text extraction';
-      });
-    }
-  }
-
-  Future<void> sendImageToDjango(File imageFile) async {
-    const apiUrl = 'http://127.0.0.1:8000/ocrapi';
-
-    try {
-      var request = http.MultipartRequest('POST', Uri.parse(apiUrl))
-        ..files.add(await http.MultipartFile.fromPath(
-          'image_file',
-          imageFile.path,
-        ));
-
-      var response = await request.send();
-
-      if (response.statusCode == 200) {
-        final Map<String, dynamic> data =
-            json.decode(await response.stream.bytesToString());
-
-        print('Réponse de l\'API Django : $data');
-      } else {
-        print(
-            'Erreur lors de la requête vers l\'API Django. Statut : ${response.statusCode}');
-      }
-    } catch (error) {
-      print('Exception lors de la requête vers l\'API Django : $error');
-      setState(() {
-        _extractedText = 'Error during API request';
-      });
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('E-Scanner'),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            ElevatedButton(
-              onPressed: pickImage,
-              child: const Text('Sélectionner une image'),
-            ),
-            const SizedBox(height: 20),
-            if (_pickedImage != null) Image.file(_pickedImage!),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: isLoading
-                  ? null
-                  : () async {
-                      await _startOCR();
-                    },
-              child: const Text('Charger l\'image et exécuter OCR'),
-            ),
-            const SizedBox(height: 20),
-            if (isLoading)
-              const CircularProgressIndicator()
-            else
-              Text(
-                'Texte extrait : $_extractedText',
-                style: const TextStyle(fontSize: 16),
-              ),
-          ],
-        ),
-      ),
+      home: LoginScreen(),
     );
   }
 }

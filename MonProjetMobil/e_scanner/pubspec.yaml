@@ -49,6 +49,7 @@ dependencies:
   flutter_scalable_ocr: ^2.0.0
   flutter_ocr_sdk: ^1.1.4
   file_picker: ^6.1.1
+  font_awesome_flutter: ^10.6.0
 
 dev_dependencies:
   flutter_test:
