@@ -363,19 +363,23 @@ import 'package:flutter_tesseract_ocr/flutter_tesseract_ocr.dart';
 import 'package:file_picker/file_picker.dart';
 
 void main() {
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       home: MyHomePage(),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
+  const MyHomePage({super.key});
+
   @override
   _MyHomePageState createState() => _MyHomePageState();
 }
@@ -405,7 +409,6 @@ class _MyHomePageState extends State<MyHomePage> {
         _extractedText = result ?? 'No text extracted';
       });
 
-      // Envoyer le fichier image à l'API Django
       await sendImageToDjango(_pickedImage!);
     } catch (e) {
       print('Erreur lors de l\'extraction du texte : $e');
@@ -416,7 +419,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Future<void> sendImageToDjango(File imageFile) async {
-    final apiUrl = 'http://127.0.0.1:8000/ocrapi';
+    const apiUrl = 'http://127.0.0.1:8000/ocrapi';
 
     try {
       var request = http.MultipartRequest('POST', Uri.parse(apiUrl))
@@ -430,7 +433,7 @@ class _MyHomePageState extends State<MyHomePage> {
       if (response.statusCode == 200) {
         final Map<String, dynamic> data =
             json.decode(await response.stream.bytesToString());
-        // Traitez les données de la réponse ici
+
         print('Réponse de l\'API Django : $data');
       } else {
         print(
@@ -448,7 +451,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('E-Scanner'),
+        title: const Text('E-Scanner'),
       ),
       body: Center(
         child: Column(
@@ -456,26 +459,26 @@ class _MyHomePageState extends State<MyHomePage> {
           children: [
             ElevatedButton(
               onPressed: pickImage,
-              child: Text('Sélectionner une image'),
+              child: const Text('Sélectionner une image'),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             if (_pickedImage != null) Image.file(_pickedImage!),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             ElevatedButton(
               onPressed: isLoading
                   ? null
                   : () async {
                       await _startOCR();
                     },
-              child: Text('Charger l\'image et exécuter OCR'),
+              child: const Text('Charger l\'image et exécuter OCR'),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             if (isLoading)
-              CircularProgressIndicator()
+              const CircularProgressIndicator()
             else
               Text(
                 'Texte extrait : $_extractedText',
-                style: TextStyle(fontSize: 16),
+                style: const TextStyle(fontSize: 16),
               ),
           ],
         ),

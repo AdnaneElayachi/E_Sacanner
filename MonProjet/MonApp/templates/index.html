@@ -39,6 +39,8 @@
             text-align: center;
             color: #777;
         }
+
+        
     </style>
 </head>
 <body>
@@ -68,12 +70,13 @@
             <div class="mb-3">
                 <label for="image_file" class="form-label">Sélectionner une image</label>
                 <input type="file" class="form-control" name="image_file" id="image_file" accept="image/*" required>
-            </div>
+                       </div>
             <button type="submit" class="btn btn-primary">Soumettre</button>
         </form>
         <div class="result-container">
             {% if texte %}
-                <p>Texte extrait : {{ texte }}</p><br>
+                <p>Texte extrait : {{ texte}}</p><br>
+                {consonle.log}
             {% else %}
                 <p>Aucun texte détecté dans l'image.</p>
             {% endif %}

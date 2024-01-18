@@ -185,8 +185,30 @@ def texte_vers_dataframe(texte):
     df = pd.DataFrame(data)
     return df
 
+# def reconnaissance_ID(chemin_image):
+#     try:
+#         img = cv2.imread(chemin_image)
+#         if img is None:
+#             raise Exception("Erreur : Impossible d'ouvrir l'image.")
+
+#         img_pretraitee = pretraiter_image(img)
+
+#         texte = pytesseract.image_to_string(img_pretraitee, lang='eng')
+
+#         if texte:
+#             print("Texte extrait :")
+#             print(texte)
+#             return texte
+#         else:
+#             print("Aucun texte détecté dans l'image.")
+#     except Exception as e:
+#         print(str(e))
+
+#     return None
+
+
 def reconnaissance_ID(chemin_image):
-    try:
+    
         img = cv2.imread(chemin_image)
         if img is None:
             raise Exception("Erreur : Impossible d'ouvrir l'image.")
@@ -199,9 +221,5 @@ def reconnaissance_ID(chemin_image):
             print("Texte extrait :")
             print(texte)
             return texte
-        else:
-            print("Aucun texte détecté dans l'image.")
-    except Exception as e:
-        print(str(e))
-
-    return None
+       
+  

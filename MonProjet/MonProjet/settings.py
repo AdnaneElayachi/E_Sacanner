@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'graphene_django',
     'whitenoise',
     'MonApp',
+    
 
 ]
 
@@ -142,9 +143,36 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
 CORS_ALLOWED_ORIGINS = [
+   
+"http://localhost:8000",
+"http://127.0.0.1:9000"
   
 ]
 
+CORS_ALLOWED_ORIGIN_REGEXES = [
+r"^https://\w+\.domain\.com$",
+]
+
+CORS_ALLOW_METHODS = [
+'DELETE',
+'GET',
+'OPTIONS',
+'PATCH',
+'POST',
+'PUT',
+]
+
+CORS_ALLOW_HEADERS = [
+'accept',
+'accept-encoding',
+'authorization',
+'content-type',
+'dnt',
+'origin',
+'user-agent',
+'x-csrftoken',
+'x-requested-with',
+]
 from pathlib import Path
 import os
 
